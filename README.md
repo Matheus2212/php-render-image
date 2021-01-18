@@ -10,5 +10,5 @@ Se a imagem não corresponder as dimensões informadas, ela será aumentada e de
 
 Exemplo:
 ```HTML
-<img src="gera_foto.php?imagem=../local/da/imagem.extensao" />
+<img src="gera_foto.php?imagem=../local/da/imagem.extensao&modo=configuracao_do_modo" />
 ```
