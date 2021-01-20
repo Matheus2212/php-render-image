@@ -1,6 +1,10 @@
 # PHP-Gera-foto
 Script que vai gerar a foto que você precisar em dimensões específicas
 
+Você não precisa incluir o script em arquivo algum. Basta utilizar a sintaxe HTML para exibir uma imagem.
+
+O script já retorna um recurso de imagem e seu cabelalho será o mesmo da do tipo de imagem informada (jpeg -> jpeg, png -> png, etc).
+
 Ele te permite:
 * Enquadrar a Imagem
 * Cortar a Imagem
