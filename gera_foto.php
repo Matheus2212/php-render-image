@@ -1,9 +1,9 @@
 <?php
 
 /*
-PHP_GeraFoto v1.0
+PHP_GeraFoto v1.1
 
-Esse script foi desenvolvido por Matheus Felipe Marques, com inspiração na experiência que adquiriu em trabalhos passados, como um dos passatempos mais divertidos durante a quarentena de 2020.
+Desenvolvido por Matheus Felipe Marques, com inspiração na experiência que adquiriu em trabalhos passados, como um dos passatempos mais divertidos durante a quarentena de 2020 e para entender como a biblioteca GD funciona, e de quebra ainda facilitar a vida :-)
 Esse script pode proporcionar uma economia de tempo gigantesca relacionado a imagens com dimensões incorretas.
 Esse script não utiliza nenhuma dependência ou algo do tipo (é independente). Sinta-se livre para poder editá-lo e usá-lo da forma que melhor lhe conver. 
 Ele não suporta imagens via endereço web (URL), pois senão qualquer um pode enviar uma URL para este script e isso pode sobrecarregar seu servidor. 
@@ -14,9 +14,26 @@ Sintaxe de uso: <img src="caminho/ate/script/gera_foto.php?imagem=../local/da/im
 Link projeto: https://github.com/Matheus2212/PHP_GeraFoto
 
 Perfil: https://github.com/Matheus2212
+
+[CHANGELOG]
+20210-02-05 -> Adicionada verificação de URL, para ser possível pegar a imagem se, e somente se, estiver no mesmo domínio (usará file_get_contents e irá verificar o mimetype utilizando os headers definidos pela função).
+
+
 */
 
-if (!isset($_GET['imagem']) || !isset($_GET['perfil']) || (!file_exists($_GET['imagem']))) {
+if (!isset($_GET['imagem']) || !isset($_GET['perfil'])) {
+    exit();
+}
+
+$permitido = false;
+if (!preg_match("/" . addslashes($_SERVER['HTTP_HOST']) . "/", $_GET['imagem']) && file_exists($_GET['imagem'])) {
+    $permitido = true;
+}
+if (preg_match("/\/" . addSlashes($_SERVER['HTTP_HOST']) . "\//", $_GET['imagem'])) {
+    $permitido = true;
+}
+
+if (!$permitido) {
     exit();
 }
 
@@ -57,7 +74,23 @@ if ($mime_type) {
         exit();
     }
 } else {
-    exit();
+    $mime_type = @file_get_contents($imagem);
+    if ($mime_type) {
+        $pattern = "/^content-type\s*:\s*(.*)$/i";
+        if (($header = array_values(preg_grep($pattern, $http_response_header))) && (preg_match($pattern, $header[0], $match) !== false)) {
+            $content_type = $match[1];
+            $test = explode("/", $content_type);
+            if ($test[0] == "image") {
+                $extensao = strtolower($test[1]);
+            } else {
+                exit();
+            }
+        } else {
+            exit();
+        }
+    } else {
+        exit();
+    }
 }
 
 function getCanvas($largura, $altura, $cor = false)
@@ -106,6 +139,11 @@ function getImage($imagem, $extensao)
 function setImage($imagem, $extensao)
 {
     $qualidade = 100;
+
+    //New way
+    imagewebp($imagem, null, $qualidade);
+    /* Old fashioned way */
+    /*
     switch ($extensao) {
         case ("jpeg" || "jpg"):
             imagejpeg($imagem, NULL, $qualidade);
@@ -120,6 +158,7 @@ function setImage($imagem, $extensao)
             imagebmp($imagem, NULL, $qualidade);
             break;
     }
+    */
 }
 
 function defineGlobais()
@@ -217,7 +256,9 @@ function _gerar_enquadrado($perfil, $definir = false)
 function gerar()
 {
     $perfil = defineGlobais();
-    header("Content-type:image/" . $perfil['extensao']);
+    //header("Content-type:image/" . $perfil['extensao']);
+    // new gen format image
+    header("Content-type:image/webp");
     if ($perfil['modo'] == "enquadrar") {
         if (!isset($perfil['canvas'])) {
             $perfil = _gerar_enquadrado($perfil, 'definir');
