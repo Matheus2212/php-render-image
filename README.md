@@ -8,9 +8,13 @@ O script já retorna um recurso de imagem e seu cabelalho será o mesmo da do ti
 Ele te permite:
 * Enquadrar a Imagem
 * Cortar a Imagem
+* Aumentar a Imagem (obviamente, diminui qualidade)
+* Manter tamanho original
 
 Se a imagem não corresponder as dimensões informadas, ela será aumentada e definido no formato escolhido (enquadrar ou cortar). 
-É uma operação bem simples e poder chamado de forma bem simples também. 
+É uma operação bem simples e pode ser chamada de forma bem simples também. 
+
+Todos os modos de renderização mantém a imagem na proporção dela (não vai ter altura mais estreita que largura ou vice versa, por exemplo).
 
 Exemplo:
 ```HTML
