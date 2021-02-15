@@ -1,7 +1,7 @@
 <?php
 
 /*
-PHP_GeraFoto v1.1
+PHP_GeraFoto v1.2
 
 Desenvolvido por Matheus Felipe Marques, com inspiração na experiência que adquiriu em trabalhos passados, como um dos passatempos mais divertidos durante a quarentena de 2020 e para entender como a biblioteca GD funciona, e de quebra ainda facilitar a vida :-)
 Esse script pode proporcionar uma economia de tempo gigantesca relacionado a imagens com dimensões incorretas.
@@ -16,8 +16,8 @@ Link projeto: https://github.com/Matheus2212/PHP_GeraFoto
 Perfil: https://github.com/Matheus2212
 
 [CHANGELOG]
-20210-02-05 -> Adicionada verificação de URL, para ser possível pegar a imagem se, e somente se, estiver no mesmo domínio (usará file_get_contents e irá verificar o mimetype utilizando os headers definidos pela função).
-
+2021-02-05 -> Adicionada verificação de URL, para ser possível pegar a imagem se, e somente se, estiver no mesmo domínio (usará file_get_contents e irá verificar o mimetype utilizando os headers definidos pela função).
+2021-02-15 -> Melhorar função de criação de canvas para suportar transparência no fundo da imagem. Esta função funciona melhor tendo como base imagens .png. No modo "enquadrar", a porção adicional da imagem ficará transparente. 
 
 */
 
@@ -32,7 +32,6 @@ if (!preg_match("/" . addslashes($_SERVER['HTTP_HOST']) . "/", $_GET['imagem']) 
 if (preg_match("/\/" . addSlashes($_SERVER['HTTP_HOST']) . "\//", $_GET['imagem'])) {
     $permitido = true;
 }
-
 if (!$permitido) {
     exit();
 }
@@ -53,6 +52,12 @@ $configuracao = array(
         "largura_gerar" => 400,
         "altura_gerar" => 400,
         "modo" => 'cortar',
+        "cor_fundo" => "transparente",
+    ),
+    "doutor" => array(
+        "largura_gerar" => 430,
+        "altura_gerar" => 572,
+        "modo" => 'enquadrar',
     ),
 );
 
@@ -98,13 +103,19 @@ function getCanvas($largura, $altura, $cor = false)
     if (!$cor) {
         $cor = '#FFFFFF';
     }
-    $cor = str_replace('#', '', $cor);
-    $rgb = array();
-    for ($x = 0; $x < 3; $x++) {
-        $rgb[$x] = hexdec(substr($cor, (2 * $x), 2));
+    if ($cor !== "transparente") {
+        $cor = str_replace('#', '', $cor);
+        $rgb = array();
+        for ($x = 0; $x < 3; $x++) {
+            $rgb[$x] = hexdec(substr($cor, (2 * $x), 2));
+        }
     }
     $canvas = imagecreatetruecolor($largura, $altura);
-    $background = imagecolorallocate($canvas, $rgb[0], $rgb[1], $rgb[2]);
+    if ($cor == "transparente") {
+        $background = imagecolorallocatealpha($canvas, 0, 0, 0, 127);
+    } else {
+        $background = imagecolorallocate($canvas, $rgb[0], $rgb[1], $rgb[2]);
+    }
     imagefill($canvas, 0, 0, $background);
     return $canvas;
 }
