@@ -28,3 +28,21 @@ Também pode ser passada a configuração via URL - obviamente sanitizar nas con
 <img src="gera_foto.php?imagem=../local/da/imagem.extensao&perfil=perfil_configuracao&modo=aumentar&largura=1080&altura=720" />
 <img src="gera_foto.php?imagem=../local/da/imagem.extensao&perfil=perfil_configuracao&modo=original" />
 ```
+
+Exemplo de perfil dentro do script: 
+
+```PHP
+$configuracao = array(
+    /*"nome_perfil" => array( // é o nome da configuração - evite repetir
+        "largura_gerar" => 300, // largura a ser gerado - utilizar px (pixels)
+        "altura_gerar" => 300, // altura a ser gerado - utilizar px (pixels)
+        "modo" => 'cortar', // modo de renderização (opcões: cortar, enquadrar, aumentar, original)
+        "cor_fundo" => "#000000" // cor de fundo (utilizar hexadecimal - melhor resultado em imagens .png com fundo transparente)
+    ),*/
+    "screenshot" => array(
+        "largura_gerar" => 1200,
+        "altura_gerar" => 900,
+        "modo" => 'cortar',
+    ),
+);
+```
