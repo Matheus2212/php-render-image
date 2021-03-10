@@ -37,7 +37,7 @@ $configuracao = array(
         "largura_gerar" => 300, // largura a ser gerado - utilizar px (pixels)
         "altura_gerar" => 300, // altura a ser gerado - utilizar px (pixels)
         "modo" => 'cortar', // modo de renderização (opcões: cortar, enquadrar, aumentar, original)
-        "cor_fundo" => "#000000" // cor de fundo (utilizar hexadecimal - melhor resultado em imagens .png com fundo transparente)
+        "cor_fundo" => "#000000" // também pode colocar "transparente". cor de fundo (utilizar hexadecimal - melhor resultado em imagens .png com fundo transparente)
     ),*/
     "screenshot" => array(
         "largura_gerar" => 1200,
