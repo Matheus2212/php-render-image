@@ -16,7 +16,9 @@ Se a imagem não corresponder as dimensões informadas, ela será aumentada e de
 
 Todos os modos de renderização mantém a imagem na proporção dela (não vai ter altura mais estreita que largura ou vice versa, por exemplo).
 
-Exemplo:
+---
+
+##Exemplo:
 ```HTML
 <img src="geraFoto.php?imagem=../local/da/imagem.extensao&modo=perfil_configuracao" />
 ```
@@ -28,8 +30,9 @@ Também pode ser passada a configuração via URL - obviamente sanitizar nas con
 <img src="geraFoto.php?imagem=../local/da/imagem.extensao&perfil=perfil_configuracao&modo=aumentar&largura=1080&altura=720" />
 <img src="geraFoto.php?imagem=../local/da/imagem.extensao&perfil=perfil_configuracao&modo=original" />
 ```
+---
 
-Exemplo de perfil dentro do script: 
+##Exemplo de perfil dentro do script: 
 
 ```PHP
 $configuracao = array(
@@ -46,3 +49,4 @@ $configuracao = array(
     ),
 );
 ```
+Aproveite!
