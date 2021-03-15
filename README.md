@@ -18,7 +18,7 @@ Todos os modos de renderização mantém a imagem na proporção dela (não vai 
 
 ---
 
-##Exemplo:
+## Exemplo:
 ```HTML
 <img src="geraFoto.php?imagem=../local/da/imagem.extensao&modo=perfil_configuracao" />
 ```
@@ -32,7 +32,7 @@ Também pode ser passada a configuração via URL - obviamente sanitizar nas con
 ```
 ---
 
-##Exemplo de perfil dentro do script: 
+## Exemplo de perfil dentro do script: 
 
 ```PHP
 $configuracao = array(
