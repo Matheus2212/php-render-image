@@ -1,4 +1,4 @@
-# PHP_GeraFoto
+# PHP Gera Foto
 Script que vai gerar a foto que você precisar em dimensões específicas
 
 Você não precisa incluir o script em arquivo algum. Basta utilizar a sintaxe HTML para exibir uma imagem.
