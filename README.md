@@ -1,4 +1,4 @@
-# PHP Gera Foto
+# PHP Render Image
 This script will render the image on the server side.
 
 Just use the HTML and PHP $_GET sintax to render the image you want.
