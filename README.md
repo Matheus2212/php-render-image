@@ -1,38 +1,37 @@
 # PHP Gera Foto
-Script que vai gerar a foto que você precisar em dimensões específicas
+This script will render the image on the server side.
 
-Você não precisa incluir o script em arquivo algum. Basta utilizar a sintaxe HTML para exibir uma imagem.
+Just use the HTML and PHP $_GET sintax to render the image you want.
 
-O script já retorna um recurso de imagem e seu cabelalho será o mesmo da do tipo de imagem informada (jpeg -> jpeg, png -> png, etc).
+The script sets the header depending on the type of file (jpeg -> header(image/jpeg));
 
-Ele te permite:
-* Enquadrar a Imagem
-* Cortar a Imagem
-* Aumentar a Imagem (obviamente, diminui qualidade)
-* Manter tamanho original
+This scrips allows you to:
+* Fit image on specified dimmensions
+* Cut image
+* Enlarge image
+* Keep original dimmensions
 
-Se a imagem não corresponder as dimensões informadas, ela será aumentada e definido no formato escolhido (enquadrar ou cortar). 
-É uma operação bem simples e pode ser chamada de forma bem simples também. 
+If the image doesn't match any of the specified dimmensions, the script will automatically render it with the most suitable dimmensions.
 
-Todos os modos de renderização mantém a imagem na proporção dela (não vai ter altura mais estreita que largura ou vice versa, por exemplo).
+All renders keeps image aspect ratio "as is".
 
 ---
 
-## Exemplo:
+## For example:
 ```HTML
-<img src="geraFoto.php?imagem=../local/da/imagem.extensao&modo=perfil_configuracao" />
+<img src="render_image.php?imagem=../path/to/image.jpeg&modo=perfil_configuracao" />
 ```
 
-Também pode ser passada a configuração via URL - obviamente sanitizar nas configurações:
+It can also be set using URL (the script have a domain validation).
 ```HTML
-<img src="geraFoto.php?imagem=../local/da/imagem.extensao&perfil=perfil_configuracao&modo=cortar&largura=1080&altura=720" />
-<img src="geraFoto.php?imagem=../local/da/imagem.extensao&perfil=perfil_configuracao&modo=enquadrar&largura=1080&altura=720" />
-<img src="geraFoto.php?imagem=../local/da/imagem.extensao&perfil=perfil_configuracao&modo=aumentar&largura=1080&altura=720" />
-<img src="geraFoto.php?imagem=../local/da/imagem.extensao&perfil=perfil_configuracao&modo=original" />
+<img src="render_image.php?imagem=../path/to/image.jpeg&perfil=perfil_configuracao&modo=cortar&largura=1080&altura=720" />
+<img src="geraFoto.php?imagem=../path/to/image.jpeg&perfil=perfil_configuracao&modo=enquadrar&largura=1080&altura=720" />
+<img src="geraFoto.php?imagem=../path/to/image.jpeg&perfil=perfil_configuracao&modo=aumentar&largura=1080&altura=720" />
+<img src="geraFoto.php?imagem=../path/to/image.jpeg&perfil=perfil_configuracao&modo=original" />
 ```
 ---
 
-## Exemplo de perfil dentro do script: 
+## Example of render profile: 
 
 ```PHP
 $configuracao = array(
@@ -49,4 +48,4 @@ $configuracao = array(
     ),
 );
 ```
-Aproveite!
+Enjoy!
