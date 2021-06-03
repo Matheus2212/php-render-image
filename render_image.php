@@ -1,24 +1,26 @@
 <?php
 
 /*
-PHP_GeraFoto v1.2
+PHP_GeraFoto v1.3
 
 Desenvolvido por Matheus Felipe Marques, com inspiração na experiência que adquiriu em trabalhos passados, como um dos passatempos mais divertidos durante a quarentena de 2020 e para entender como a biblioteca GD funciona, e de quebra ainda facilitar a vida :-)
 Esse script pode proporcionar uma economia de tempo gigantesca relacionado a imagens com dimensões incorretas.
 Esse script não utiliza nenhuma dependência ou algo do tipo (é independente). Sinta-se livre para poder editá-lo e usá-lo da forma que melhor lhe conver. 
-Antes ele não suportava gerar imagens via URL, mas agora ele gera sim, PORÉM, com a limitação de que a imagem deve ser do mesmo domínio (precisa estar em seu servidor).
+Antes ele não suportava gerar imagens via URL, mas agora ele gera sim, mas com a limitação de que a imagem deve ser do mesmo domínio (precisa estar em seu servidor).
 Sinta-se livre para comentar ou apoiar.
 
-Sintaxe de uso: <img src="caminho/ate/script/gera_foto.php?imagem=../local/da/imagem.extensao&modo=perfil_configuracao" />
-Ou Sintaxe de uso: <img src="caminho/ate/script/gera_foto.php?imagem=https://local/da/imagem.extensao&modo=perfil_configuracao" />
+Sintaxe de uso: 
+1. <img src="caminho/ate/script/render_image.php?imagem=../local/da/imagem.extensao&modo=perfil_configuracao" />
+2. <img src="caminho/ate/script/render_image.php?imagem=https://local/da/imagem.extensao&modo=perfil_configuracao" />
 
-Link projeto: https://github.com/Matheus2212/PHP_GeraFoto
+Projeto: https://github.com/Matheus2212/PHP_GeraFoto
 
-Perfil: https://github.com/Matheus2212
+Github: https://github.com/Matheus2212
 
 [CHANGELOG]
 2021-02-05 -> Adicionada verificação de URL, para ser possível pegar a imagem se, e somente se, estiver no mesmo domínio (usará file_get_contents e irá verificar o mimetype utilizando os headers definidos pela função).
 2021-02-15 -> Melhorar função de criação de canvas para suportar transparência no fundo da imagem. Esta função funciona melhor tendo como base imagens .png. No modo "enquadrar", a porção adicional da imagem ficará transparente. 
+2021-06-03 -> Não é mais forçada a criação da imagem em formato webp, mas apenas a renderização da mesma.
 
 */
 
@@ -34,7 +36,7 @@ if (preg_match("/\/" . addSlashes($_SERVER['HTTP_HOST']) . "\//", $_GET['imagem'
     $permitido = true;
 }
 if (!$permitido) {
-    exit();
+    exit;
 }
 
 $configuracao = array(
@@ -44,21 +46,10 @@ $configuracao = array(
         "modo" => 'cortar', // modo de renderização (opcões: cortar, enquadrar, aumentar, original)
         "cor_fundo" => "#000000" // cor de fundo (utilizar hexadecimal - melhor resultado em imagens .png com fundo transparente)
     ),*/
-    "procedimentos" => array(
+    "imagem" => array(
         "largura_gerar" => 300,
         "altura_gerar" => 300,
         "modo" => 'cortar',
-    ),
-    "blog" => array(
-        "largura_gerar" => 400,
-        "altura_gerar" => 400,
-        "modo" => 'cortar',
-        "cor_fundo" => "transparente",
-    ),
-    "doutor" => array(
-        "largura_gerar" => 430,
-        "altura_gerar" => 572,
-        "modo" => 'enquadrar',
     ),
 );
 
@@ -153,9 +144,9 @@ function setImage($imagem, $extensao)
     $qualidade = 100;
 
     //New way
-    imagewebp($imagem, null, $qualidade);
+    //imagewebp($imagem, null, $qualidade);
     /* Old fashioned way */
-    /*
+
     switch ($extensao) {
         case ("jpeg" || "jpg"):
             imagejpeg($imagem, NULL, $qualidade);
@@ -170,7 +161,6 @@ function setImage($imagem, $extensao)
             imagebmp($imagem, NULL, $qualidade);
             break;
     }
-    */
 }
 
 function defineGlobais()
