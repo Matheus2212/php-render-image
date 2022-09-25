@@ -1,84 +1,85 @@
 <?php
 
 /*
-PHP_GeraFoto v1.3
-
-Desenvolvido por Matheus Felipe Marques, com inspiração na experiência que adquiriu em trabalhos passados, como um dos passatempos mais divertidos durante a quarentena de 2020 e para entender como a biblioteca GD funciona, e de quebra ainda facilitar a vida :-)
-Esse script pode proporcionar uma economia de tempo gigantesca relacionado a imagens com dimensões incorretas.
-Esse script não utiliza nenhuma dependência ou algo do tipo (é independente). Sinta-se livre para poder editá-lo e usá-lo da forma que melhor lhe conver. 
-Antes ele não suportava gerar imagens via URL, mas agora ele gera sim, mas com a limitação de que a imagem deve ser do mesmo domínio (precisa estar em seu servidor).
-Sinta-se livre para comentar ou apoiar.
-
-Sintaxe de uso: 
-1. <img src="caminho/ate/script/render_image.php?imagem=../local/da/imagem.extensao&modo=perfil_configuracao" />
-2. <img src="caminho/ate/script/render_image.php?imagem=https://local/da/imagem.extensao&modo=perfil_configuracao" />
-
-Projeto: https://github.com/Matheus2212/PHP_GeraFoto
-
-Github: https://github.com/Matheus2212
-
-[CHANGELOG]
-2021-02-05 -> Adicionada verificação de URL, para ser possível pegar a imagem se, e somente se, estiver no mesmo domínio (usará file_get_contents e irá verificar o mimetype utilizando os headers definidos pela função).
-2021-02-15 -> Melhorar função de criação de canvas para suportar transparência no fundo da imagem. Esta função funciona melhor tendo como base imagens .png. No modo "enquadrar", a porção adicional da imagem ficará transparente. 
-2021-06-03 -> Não é mais forçada a criação da imagem em formato webp, mas apenas a renderização da mesma.
-
+PHP Render Image
+* Simple way to render an image the way you want without needing to touch original file
 */
 
-if (!isset($_GET['imagem']) || !isset($_GET['perfil'])) {
+if (!isset($_GET['image']) || !isset($_GET['profile'])) {
     exit();
 }
 
-$permitido = false;
-if (!preg_match("/" . addslashes($_SERVER['HTTP_HOST']) . "/", $_GET['imagem']) && file_exists($_GET['imagem'])) {
-    $permitido = true;
+$allowed = false;
+if (!preg_match("/" . addslashes($_SERVER['HTTP_HOST']) . "/", $_GET['image']) && file_exists($_GET['image'])) {
+    $allowed = true;
 }
-if (preg_match("/\/" . addSlashes($_SERVER['HTTP_HOST']) . "\//", $_GET['imagem'])) {
-    $permitido = true;
+if (preg_match("/\/" . addSlashes($_SERVER['HTTP_HOST']) . "\//", $_GET['image'])) {
+    $allowed = true;
 }
-if (!$permitido) {
+if (!$allowed) {
     exit;
 }
 
-$configuracao = array(
-    /*"nome_perfil" => array( // é o nome da configuração - evite repetir
-        "largura_gerar" => 300, // largura a ser gerado - utilizar px (pixels)
-        "altura_gerar" => 300, // altura a ser gerado - utilizar px (pixels)
-        "modo" => 'cortar', // modo de renderização (opcões: cortar, enquadrar, aumentar, original)
-        "cor_fundo" => "#000000" // cor de fundo (utilizar hexadecimal - melhor resultado em imagens .png com fundo transparente)
+$setup = array(
+    /*"profile_name" => array( // no repeat
+        "with" => 300, // width in pixels
+        "height" => 300, // height in pixels
+        "mode" => 'cut', // render mode (cut, fit, scale, original)
+        "background_color" => "#000000" // transparent color only for PNG images
     ),*/
-    "imagem" => array(
-        "largura_gerar" => 300,
-        "altura_gerar" => 300,
-        "modo" => 'cortar',
+    "bandeira" => array(
+        "width" => 18,
+        "height" => 12,
+        "mode" => 'fit',
+    ),
+    "icone" => array(
+        "width" => 14,
+        "height" => 12,
+        "mode" => 'fit',
+    ),
+    "seta" => array(
+        "width" => 11,
+        "height" => 12,
+        "mode" => 'fit',
+    ),
+    "partner" => array(
+        "width" => 400,
+        "height" => 47,
+        "mode" => 'fit',
+    ),
+    "logo" => array(
+        "width" => 91,
+        "height" => 39,
+        "mode" => 'fit',
     ),
 );
 
-$perfil = array();
+$profile = array();
 
-if (isset($configuracao[$_GET['perfil']])) {
-    $perfil = $configuracao[$_GET['perfil']];
+if (isset($setup[$_GET['profile']])) {
+    $profile = $setup[$_GET['profile']];
 } else {
     exit();
 }
 
-$imagem = $_GET['imagem'];
-$mime_type = @mime_content_type($imagem);
+$image = $_GET['image'];
+$mime_type = @mime_content_type($image);
 if ($mime_type) {
     $array_mime_type = explode('/', $mime_type);
     if ($array_mime_type[0] == "image") {
-        $extensao = strtolower($array_mime_type[1]);
+        $extension = strtolower($array_mime_type[1]);
     } else {
         exit();
     }
 } else {
-    $mime_type = @file_get_contents($imagem);
+    $mime_type = @file_get_contents($image);
     if ($mime_type) {
         $pattern = "/^content-type\s*:\s*(.*)$/i";
         if (($header = array_values(preg_grep($pattern, $http_response_header))) && (preg_match($pattern, $header[0], $match) !== false)) {
             $content_type = $match[1];
             $test = explode("/", $content_type);
             if ($test[0] == "image") {
-                $extensao = strtolower($test[1]);
+                $extension = strtolower($test[1]);
             } else {
                 exit();
             }
@@ -90,20 +91,20 @@ if ($mime_type) {
     }
 }
 
-function getCanvas($largura, $altura, $cor = false)
+function getCanvas($width, $height, $color = false)
 {
-    if (!$cor) {
-        $cor = '#FFFFFF';
+    if (!$color) {
+        $color = '#FFFFFF';
     }
-    if ($cor !== "transparente") {
-        $cor = str_replace('#', '', $cor);
+    if ($color !== "transparent") {
+        $color = str_replace('#', '', $color);
         $rgb = array();
         for ($x = 0; $x < 3; $x++) {
-            $rgb[$x] = hexdec(substr($cor, (2 * $x), 2));
+            $rgb[$x] = hexdec(substr($color, (2 * $x), 2));
         }
     }
-    $canvas = imagecreatetruecolor($largura, $altura);
-    if ($cor == "transparente") {
+    $canvas = imagecreatetruecolor($width, $height);
+    if ($color == "transparent") {
         $background = imagecolorallocatealpha($canvas, 0, 0, 0, 127);
     } else {
         $background = imagecolorallocate($canvas, $rgb[0], $rgb[1], $rgb[2]);
@@ -112,173 +113,174 @@ function getCanvas($largura, $altura, $cor = false)
     return $canvas;
 }
 
-function getImage($imagem, $extensao)
+function getImage($image, $extension)
 {
     $resource = "";
 
     //New way
-    $resource = imagecreatefromstring(file_get_contents($imagem));
+    $resource = imagecreatefromstring(file_get_contents($image));
 
     /*
     //Old fashioned way
-    switch ($extensao) {
+    switch ($extension) {
         case "jpeg":
         case "jpg":
-            $resource = imagecreatefromjpeg($imagem);
+            $resource = imagecreatefromjpeg($image);
             break;
         case "png":
-            $resource = imagecreatefrompng($imagem);
+            $resource = imagecreatefrompng($image);
             break;
         case "gif":
-            $resource = imagecreatefromgif($imagem);
+            $resource = imagecreatefromgif($image);
             break;
         case "bmp":
-            $resource = imagecreatefrombmp($imagem);
+            $resource = imagecreatefrombmp($image);
             break;
     }*/
     return $resource;
 }
 
-function setImage($imagem, $extensao)
+function setImage($image, $extension)
 {
-    $qualidade = 100;
+    $quality = 100;
 
     //New way
-    //imagewebp($imagem, null, $qualidade);
+    //imagewebp($image, null, $quality);
     /* Old fashioned way */
 
-    switch ($extensao) {
+    switch ($extension) {
         case ("jpeg" || "jpg"):
-            imagejpeg($imagem, NULL, $qualidade);
+            imagejpeg($image, NULL, $quality);
             break;
         case "png":
-            imagepng($imagem, NULL, $qualidade);
+            imagepng($image, NULL, $quality);
             break;
         case "gif":
-            imagegif($imagem, NULL, $qualidade);
+            imagegif($image, NULL, $quality);
             break;
         case "bmp":
-            imagebmp($imagem, NULL, $qualidade);
+            imagebmp($image, NULL, $quality);
             break;
     }
 }
 
-function defineGlobais()
+function setGlobals()
 {
-    global $perfil, $imagem, $extensao;
-    $perfil['imagem'] = $imagem;
-    $perfil['extensao'] = $extensao;
-    list($perfil['largura_original'], $perfil['altura_original']) = getimagesize($imagem);
-    if (!isset($perfil['cor_fundo'])) {
-        $perfil['cor_fundo'] = false;
+    global $profile, $image, $extension;
+    $profile['image'] = $image;
+    $profile['extension'] = $extension;
+    list($profile['original_width'], $profile['original_height']) = getimagesize($image);
+    if (!isset($profile['background_color'])) {
+        $profile['background_color'] = false;
     }
-    $perfil['largura_canvas'] = $perfil['largura_gerar'];
-    if (isset($perfil['altura_gerar'])) {
-        $perfil['altura_canvas'] = $perfil['altura_gerar'];
-        $perfil['canvas'] = getCanvas($perfil['largura_canvas'], $perfil['altura_canvas'], $perfil['cor_fundo']);
+    $profile['canvas_width'] = $profile['width'];
+    if (isset($profile['height'])) {
+        $profile['canvas_height'] = $profile['height'];
+        $profile['canvas'] = getCanvas($profile['canvas_width'], $profile['canvas_height'], $profile['background_color']);
     }
-    $perfil['resource'] = getImage($imagem, $extensao);
-    return $perfil;
+    $profile['resource'] = getImage($image, $extension);
+    return $profile;
 }
 
-function _gerar_aumentado($perfil)
+function _render_scale($profile)
 {
-    imagecopyresampled($perfil['canvas'], $perfil['resource'], 0, 0, 0, 0, $perfil['largura_gerar'], $perfil['altura_gerar'], $perfil['largura_original'], $perfil['altura_original']);
+    imagecopyresampled($profile['canvas'], $profile['resource'], 0, 0, 0, 0, $profile['width'], $profile['height'], $profile['original_width'], $profile['original_height']);
 }
 
-function _gerar_original($perfil)
+function _render_original($profile)
 {
-    $perfil['largura_gerar'] = $perfil['largura_canvas'] = $perfil['largura_original'];
-    $perfil['altura_gerar'] = $perfil['altura_canvas'] = $perfil['altura_original'];
-    $perfil['canvas'] = getCanvas($perfil['largura_canvas'], $perfil['altura_canvas'], $perfil['cor_fundo']);
-    imagecopyresampled($perfil['canvas'], $perfil['resource'], 0, 0, 0, 0, $perfil['largura_gerar'], $perfil['altura_gerar'], $perfil['largura_original'], $perfil['altura_original']);
+    $profile['width'] = $profile['canvas_width'] = $profile['original_width'];
+    $profile['height'] = $profile['canvas_height'] = $profile['original_height'];
+    $profile['canvas'] = getCanvas($profile['canvas_width'], $profile['canvas_height'], $profile['background_color']);
+    imagecopyresampled($profile['canvas'], $profile['resource'], 0, 0, 0, 0, $profile['width'], $profile['height'], $profile['original_width'], $profile['original_height']);
 }
 
-function _gerar_cortado($perfil)
+function _render_cut($profile)
 {
-    if ($perfil['largura_original'] > $perfil['largura_canvas']) {
-        $diferenca = 100 - (($perfil['largura_original'] - $perfil['largura_canvas']) * 100) / $perfil['largura_original'];
-        $perfil['altura_gerar'] = ($perfil['altura_original'] / 100) * $diferenca;
-        $perfil['largura_gerar'] = ($perfil['largura_original'] / 100) * $diferenca;
+    if ($profile['original_width'] > $profile['canvas_width']) {
+        $difference = 100 - (($profile['original_width'] - $profile['canvas_width']) * 100) / $profile['original_width'];
+        $profile['height'] = ($profile['original_height'] / 100) * $difference;
+        $profile['width'] = ($profile['original_width'] / 100) * $difference;
     } else {
-        $diferenca = 100 - (($perfil['largura_canvas'] - $perfil['largura_original']) * 100) / $perfil['largura_canvas'];
-        $perfil['altura_gerar'] = ($perfil['altura_original'] * 100) / $diferenca;
-        $perfil['largura_gerar'] = ($perfil['largura_original'] * 100) / $diferenca;
+        $difference = 100 - (($profile['canvas_width'] - $profile['original_width']) * 100) / $profile['canvas_width'];
+        $profile['height'] = ($profile['original_height'] * 100) / $difference;
+        $profile['width'] = ($profile['original_width'] * 100) / $difference;
     }
-    if ($perfil['altura_gerar'] < $perfil['altura_canvas']) {
-        $diferenca = (($perfil['altura_canvas'] - $perfil['altura_gerar']) * 100) / $perfil['altura_gerar'];
-        $perfil['altura_gerar'] = $perfil['altura_gerar'] + (($perfil['altura_gerar'] / 100) * $diferenca);
-        $perfil['largura_gerar'] = $perfil['largura_gerar'] + (($perfil['largura_gerar'] / 100) * $diferenca);
+    if ($profile['height'] < $profile['canvas_height']) {
+        $difference = (($profile['canvas_height'] - $profile['height']) * 100) / $profile['height'];
+        $profile['height'] = $profile['height'] + (($profile['height'] / 100) * $difference);
+        $profile['width'] = $profile['width'] + (($profile['width'] / 100) * $difference);
     }
-    if ($perfil['largura_gerar'] < $perfil['largura_canvas']) {
-        $diferenca = (($perfil['largura_canvas'] - $perfil['largura_gerar']) * 100) / $perfil['largura_gerar'];
-        $perfil['altura_gerar'] = $perfil['altura_gerar'] + (($perfil['altura_gerar'] / 100) * $diferenca);
-        $perfil['largura_gerar'] = $perfil['largura_gerar'] + (($perfil['largura_gerar'] / 100) * $diferenca);
+    if ($profile['width'] < $profile['canvas_width']) {
+        $difference = (($profile['canvas_width'] - $profile['width']) * 100) / $profile['width'];
+        $profile['height'] = $profile['height'] + (($profile['height'] / 100) * $difference);
+        $profile['width'] = $profile['width'] + (($profile['width'] / 100) * $difference);
     }
-    $perfil['padding_altura'] = (($perfil['altura_gerar'] - $perfil['altura_canvas']) / 2) * -1;
-    $perfil['padding_largura'] = (($perfil['largura_gerar'] - $perfil['largura_canvas']) / 2) * -1;
-    imagecopyresampled($perfil['canvas'], $perfil['resource'], $perfil['padding_largura'], $perfil['padding_altura'], 0, 0, $perfil['largura_gerar'], $perfil['altura_gerar'], $perfil['largura_original'], $perfil['altura_original']);
+    $profile['padding_y'] = (($profile['height'] - $profile['canvas_height']) / 2) * -1;
+    $profile['padding_x'] = (($profile['width'] - $profile['canvas_width']) / 2) * -1;
+    imagecopyresampled($profile['canvas'], $profile['resource'], $profile['padding_x'], $profile['padding_y'], 0, 0, $profile['width'], $profile['height'], $profile['original_width'], $profile['original_height']);
 }
 
-function _gerar_enquadrado($perfil, $definir = false)
+function _render_fit($profile, $definir = false)
 {
-    if ($perfil['largura_original'] > $perfil['largura_canvas']) {
-        $diferenca = 100 - (($perfil['largura_original'] - $perfil['largura_canvas']) * 100) / $perfil['largura_original'];
-        $perfil['altura_gerar'] = ($perfil['altura_original'] / 100) * $diferenca;
-        $perfil['largura_gerar'] = ($perfil['largura_original'] / 100) * $diferenca;
+    if ($profile['original_width'] > $profile['canvas_width']) {
+        $difference = 100 - (($profile['original_width'] - $profile['canvas_width']) * 100) / $profile['original_width'];
+        $profile['height'] = ($profile['original_height'] / 100) * $difference;
+        $profile['width'] = ($profile['original_width'] / 100) * $difference;
     } else {
-        $diferenca = 100 - (($perfil['largura_canvas'] - $perfil['largura_original']) * 100) / $perfil['largura_canvas'];
-        $perfil['altura_gerar'] = ($perfil['altura_original'] * 100) / $diferenca;
-        $perfil['largura_gerar'] = ($perfil['largura_original'] * 100) / $diferenca;
+        $difference = 100 - (($profile['canvas_width'] - $profile['original_width']) * 100) / $profile['canvas_width'];
+        $profile['height'] = ($profile['original_height'] * 100) / $difference;
+        $profile['width'] = ($profile['original_width'] * 100) / $difference;
     }
-    if (isset($perfil['altura_gerar']) && isset($perfil['altura_canvas']) && $perfil['altura_gerar'] > $perfil['altura_canvas']) {
-        $diferenca = (($perfil['altura_gerar'] - $perfil['altura_canvas']) * 100) / $perfil['altura_gerar'];
-        $perfil['altura_gerar'] = $perfil['altura_gerar'] - (($perfil['altura_gerar'] / 100) * $diferenca);
-        $perfil['largura_gerar'] = $perfil['largura_gerar'] - (($perfil['largura_gerar'] / 100) * $diferenca);
+    if (isset($profile['height']) && isset($profile['canvas_height']) && $profile['height'] > $profile['canvas_height']) {
+        $difference = (($profile['height'] - $profile['canvas_height']) * 100) / $profile['height'];
+        $profile['height'] = $profile['height'] - (($profile['height'] / 100) * $difference);
+        $profile['width'] = $profile['width'] - (($profile['width'] / 100) * $difference);
     }
-    if ($perfil['largura_gerar'] > $perfil['largura_canvas']) {
-        $diferenca = (($perfil['largura_gerar'] - $perfil['largura_canvas']) * 100) / $perfil['largura_gerar'];
-        $perfil['altura_gerar'] = $perfil['altura_gerar'] + (($perfil['altura_gerar'] / 100) * $diferenca);
-        $perfil['largura_gerar'] = $perfil['largura_gerar'] + (($perfil['largura_gerar'] / 100) * $diferenca);
+    if ($profile['width'] > $profile['canvas_width']) {
+        $difference = (($profile['width'] - $profile['canvas_width']) * 100) / $profile['width'];
+        $profile['height'] = $profile['height'] + (($profile['height'] / 100) * $difference);
+        $profile['width'] = $profile['width'] + (($profile['width'] / 100) * $difference);
     }
     if (!$definir) {
-        $perfil['padding_altura'] = 0;
-        if (isset($perfil['altura_canvas'])) {
-            $perfil['padding_altura'] = (($perfil['altura_gerar'] - $perfil['altura_canvas']) / 2) * -1;
+        $profile['padding_y'] = 0;
+        if (isset($profile['canvas_height'])) {
+            $profile['padding_y'] = (($profile['height'] - $profile['canvas_height']) / 2) * -1;
         }
-        if (!isset($perfil['canvas'])) {
-            $perfil['canvas'] = getCanvas($perfil['largura_gerar'], $perfil['altura_gerar'], $perfil['cor_fundo']);
+        if (!isset($profile['canvas'])) {
+            $profile['canvas'] = getCanvas($profile['width'], $profile['height'], $profile['background_color']);
         }
-        $perfil['padding_largura'] = (($perfil['largura_gerar'] - $perfil['largura_canvas']) / 2) * -1;
-        imagecopyresampled($perfil['canvas'], $perfil['resource'], $perfil['padding_largura'], $perfil['padding_altura'], 0, 0, $perfil['largura_gerar'], $perfil['altura_gerar'], $perfil['largura_original'], $perfil['altura_original']);
+        $profile['padding_x'] = (($profile['width'] - $profile['canvas_width']) / 2) * -1;
+        imagecopyresampled($profile['canvas'], $profile['resource'], $profile['padding_x'], $profile['padding_y'], 0, 0, $profile['width'], $profile['height'], $profile['original_width'], $profile['original_height']);
     }
-    return $perfil;
+    return $profile;
 }
 
-function gerar()
+function render()
 {
-    $perfil = defineGlobais();
-    //header("Content-type:image/" . $perfil['extensao']);
+    $profile = setGlobals();
+    //header("Content-type:image/" . $profile['extension']);
+    header("Content-type:image/png");
     // new gen format image
-    header("Content-type:image/webp");
-    if ($perfil['modo'] == "enquadrar") {
-        if (!isset($perfil['canvas'])) {
-            $perfil = _gerar_enquadrado($perfil, 'definir');
-            $perfil['canvas'] = getCanvas($perfil['largura_gerar'], $perfil['altura_gerar'], $perfil['cor_fundo']);
+    //header("Content-type:image/webp");
+    if ($profile['mode'] == "fit") {
+        if (!isset($profile['canvas'])) {
+            $profile = _render_fit($profile, 'definir');
+            $profile['canvas'] = getCanvas($profile['width'], $profile['height'], $profile['background_color']);
         }
-        _gerar_enquadrado($perfil);
+        _render_fit($profile);
     }
-    if ($perfil['modo'] == "cortar") {
-        _gerar_cortado($perfil);
+    if ($profile['mode'] == "cut") {
+        _render_cut($profile);
     }
-    if ($perfil['modo'] == "aumentar") {
-        _gerar_aumentado($perfil);
+    if ($profile['mode'] == "scale") {
+        _render_scale($profile);
     }
-    if ($perfil['modo'] == "original") {
-        _gerar_original($perfil);
+    if ($profile['mode'] == "original") {
+        _render_original($profile);
     }
-    setImage($perfil['canvas'], $perfil['extensao']);
-    imagedestroy($perfil['canvas']);
+    setImage($profile['canvas'], $profile['extension']);
+    imagedestroy($profile['canvas']);
 }
 
-gerar();
+render();

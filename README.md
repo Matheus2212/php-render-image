@@ -19,32 +19,32 @@ All renders keeps image aspect ratio "as is".
 
 ## For example:
 ```HTML
-<img src="render_image.php?imagem=../path/to/image.jpeg&modo=perfil_configuracao" />
+<img src="render_image.php?image=../path/to/image.jpeg&mode=profile_name" />
 ```
 
 It can also be set using URL (the script have a domain validation).
 ```HTML
-<img src="render_image.php?imagem=../path/to/image.jpeg&perfil=perfil_configuracao&modo=cortar&largura=1080&altura=720" />
-<img src="geraFoto.php?imagem=../path/to/image.jpeg&perfil=perfil_configuracao&modo=enquadrar&largura=1080&altura=720" />
-<img src="geraFoto.php?imagem=../path/to/image.jpeg&perfil=perfil_configuracao&modo=aumentar&largura=1080&altura=720" />
-<img src="geraFoto.php?imagem=../path/to/image.jpeg&perfil=perfil_configuracao&modo=original" />
+<img src="render_image.php?image=../path/to/image.jpeg&profile=profile_name&mode=cut&width=1080&height=720" />
+<img src="render_image.php?image=../path/to/image.jpeg&profile=profile_name&mode=fit&width=1080&height=720" />
+<img src="render_image.php?image=../path/to/image.jpeg&profile=profile_name&mode=scale&width=1080&height=720" />
+<img src="render_image.php?image=../path/to/image.jpeg&profile=profile_name&mode=original" />
 ```
 ---
 
 ## Example of render profile: 
 
 ```PHP
-$configuracao = array(
-    /*"nome_perfil" => array( // é o nome da configuração - evite repetir
-        "largura_gerar" => 300, // largura a ser gerado - utilizar px (pixels)
-        "altura_gerar" => 300, // altura a ser gerado - utilizar px (pixels)
-        "modo" => 'cortar', // modo de renderização (opcões: cortar, enquadrar, aumentar, original)
-        "cor_fundo" => "#000000" // também pode colocar "transparente". cor de fundo (utilizar hexadecimal - melhor resultado em imagens .png com fundo transparente)
+$setup = array(
+    /*"profile_name" => array( // é o nome da configuração - evite repetir
+        "width" => 300, // width in pixels
+        "height" => 300, // height in pixels
+        "mode" => 'cut', // render mode (cut, fit, scale, original)
+        "background_color" => "#000000" // transparent for .png images
     ),*/
     "screenshot" => array(
-        "largura_gerar" => 1200,
-        "altura_gerar" => 900,
-        "modo" => 'cortar',
+        "width" => 1200,
+        "height" => 900,
+        "mode" => 'cut',
     ),
 );
 ```
